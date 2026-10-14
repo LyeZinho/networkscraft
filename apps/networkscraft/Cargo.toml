@@ -1,0 +1,16 @@
+[package]
+name = "networkscraft"
+description = "NetworksCraft desktop app (network lab simulator)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+default-run = "networkscraft"
+
+[lints]
+workspace = true
+
+[dependencies]
+networkscraft-net-ui-egui = { path = "../../crates/net-ui-egui" }
+eframe = { workspace = true, features = ["default_fonts", "glow"] }
+egui = { workspace = true }

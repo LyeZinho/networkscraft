@@ -45,11 +45,15 @@ pub const TABLE: &[(&str, Class)] = &[
     ("engine", Class::Layer(4)),
     ("ui-egui", Class::Layer(5)),
     ("mcp", Class::Layer(5)),
+    ("net-model", Class::Layer(0)),
+    ("net-engine", Class::Layer(4)),
+    ("net-ui-egui", Class::Layer(5)),
     ("testkit", Class::Testkit),
     // apps and tooling
     ("cadcraft", Class::Exempt),
     ("cli", Class::Exempt),
     ("web", Class::Exempt),
+    ("networkscraft", Class::Exempt),
     ("xtask", Class::Exempt),
 ];
 
@@ -75,6 +79,9 @@ pub const UI_CRATES: &[&str] = &["craft-ui", "egui", "eframe", "egui-wgpu", "wgp
 pub const UI_MIN_LAYER: u8 = 5;
 
 pub fn short_name(pkg: &str) -> &str {
+    if let Some(rest) = pkg.strip_prefix("networkscraft-") {
+        return rest;
+    }
     pkg.strip_prefix("cadcraft-").unwrap_or(pkg)
 }
 
@@ -307,7 +314,7 @@ mod tests {
 
     #[test]
     fn apps_and_xtask_exempt() {
-        for app in ["cadcraft", "cadcraft-cli", "cadcraft-web", "xtask"] {
+        for app in ["cadcraft", "cadcraft-cli", "cadcraft-web", "networkscraft", "xtask"] {
             assert!(check(&[c(app, &[("egui", Normal, false), ("cadcraft-ui-egui", Normal, true)])]).is_empty());
         }
     }

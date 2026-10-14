@@ -1087,6 +1087,7 @@ dependencies = [
  "egui-wgpu",
  "egui-winit",
  "egui_glow",
+ "glow",
  "glutin",
  "glutin-winit",
  "image",
@@ -2339,6 +2340,44 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ee6cda3051665f1fb8d9e08fc35c96d5a244fb1be711a03b71118828afc9a873"
 dependencies = [
  "jni-sys 0.3.1",
+]
+
+[[package]]
+name = "networkscraft"
+version = "0.7.0"
+dependencies = [
+ "eframe",
+ "egui",
+ "networkscraft-net-ui-egui",
+]
+
+[[package]]
+name = "networkscraft-net-engine"
+version = "0.7.0"
+dependencies = [
+ "networkscraft-net-model",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "networkscraft-net-model"
+version = "0.7.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "networkscraft-net-ui-egui"
+version = "0.7.0"
+dependencies = [
+ "craft-ui",
+ "egui",
+ "networkscraft-net-engine",
+ "networkscraft-net-model",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

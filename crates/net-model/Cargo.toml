@@ -1,0 +1,13 @@
+[package]
+name = "networkscraft-net-model"
+description = "NetworksCraft topology model (nodes, links, addresses)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { workspace = true }

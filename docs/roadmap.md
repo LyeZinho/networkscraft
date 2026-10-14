@@ -1,110 +1,240 @@
-# CADCraft roadmap detail
+# NetworksCraft — detailed roadmap (beginning to end)
 
-> **Last reviewed:** 2026-10-10 · **Last updated:** 2026-10-12 · **Change:** minor (Block Editor for static blocks: "Use blocks" evidence updated) · **Target:** Autodesk AutoCAD 2027
+This document is the **full journey** from the current skeleton to a **1.0 education-ready**
+product and beyond. It follows the Crafting Apps pattern: thin UI, everything is a command,
+automation-first, clean-room, never crash.
 
-Forward-looking plan: milestones with status, the current focus, and what comes next with
-estimates. The summary is [ROADMAP.md](../ROADMAP.md); the work items behind every line are in
-[gaps.md](gaps.md); numbers come from [target-app-parity.md](target-app-parity.md). Hours are
-Opus 5.5 agent-hours.
+**One-page summary:** [ROADMAP.md](../ROADMAP.md)  
+**Migration from legacy CAD:** [networkscraft-skeleton.md](networkscraft-skeleton.md)
 
-## Current focus
+---
 
-1. **Gate and land.** (`cargo fmt` on main is fixed.) Add a PR workflow that runs
-   `cargo xtask ci`, then review and land the 47 open PRs, most of them community bug fixes
-   (S1–S3). ≈ 15–25 h.
-2. **Stop losing data on save** (FF1, FF2, FF7) and save DWG/DXF at a chosen version (FF3).
-   ≈ 30–45 h.
-3. **A real-file corpus** and a check of our output in AutoCAD (FF5, needs the owner).
-4. **Precision input:** object snap tracking, extension/parallel snaps, FROM/M2P/TK, typed snap
-   overrides, editable dynamic input (U1–U4). ≈ 25–35 h.
-5. **Unstub the prompt options** of the most-used commands (F1). ≈ 15–25 h.
-6. **Autosave, recovery, AUDIT, RECOVER** (F4). ≈ 10–15 h.
-7. **The rest of the alpha gate:** block editor and REFEDIT, xref attach (F2, F3), and plot styles
-   with a plot dialog and preview (F14). ≈ 50–80 h.
+## Vision and success criteria
 
-Items 2–5 and 7 are the [alpha gate](#alpha-gate) rows.
+**Vision:** Anyone can build a network lab, run it locally or in the browser, see packets move,
+configure devices in a familiar CLI **without** proprietary lock-in, and let agents/scripts drive
+the same UI a human uses.
 
-## Alpha gate
+**1.0 success (education):**
 
-The core workflows a typical AutoCAD professional does every day (craftrules progress-docs
-standard). CADCraft is **pre-alpha** because four of the five fail the gate; the failing rows are
-the alpha checklist. Main platform: macOS.
+- CCNA-intro scope: topology, IPv4, static routing, VLANs, inter-VLAN routing (L3 switch or
+  router-on-a-stick), OSPF single-area, basic ACLs, DHCP/DNS stub or simple server nodes.
+- Save/share labs as open files; no cloud account required.
+- Desktop (Linux, macOS, Windows) + WASM demo.
+- MCP + headless CLI for grading and agent labs.
 
-| Core workflow | Works end to end? | Evidence | Hours to pass |
-|---|---|---|---|
-| Draw and modify precisely with object snaps and tracking | **partial, blocking** | Running snaps, polar, ortho and coordinate entry work; object snap tracking, extension and parallel snaps are toggles with no behaviour; no FROM/M2P/TK or typed snap overrides; TRIM/EXTEND standard mode, OFFSET Erase/Layer/Multiple, ROTATE Reference print "not available yet"; ellipse/spline intersections approximate ([ui-parity.md](ui-parity.md), [gaps.md](gaps.md) U1, U3, U4, F1) | 35–50 |
-| Dimension and annotate | partial, not blocking | All core DIM types, associativity, DIMSTYLE variables (43 of ~80), TEXT/MTEXT, MLEADER, tables work; no DIMSTYLE dialog, MTEXT editor not in place, MLEADER thin (F7, F9, F10). A drafter can dimension a sheet end to end | 0 for the gate (beta work) |
-| Use blocks (insert library blocks, edit them, attributes, xrefs) | **partial, blocking** | Static BLOCK/INSERT/attributes, ATTSYNC, BATTMAN editing, xrefs (#525) and the Block Editor (BEDIT/BSAVE/BCLOSE: every reference updates) work; no REFEDIT, so a block can't be edited in place in the drawing; no XCLIP; dynamic blocks from other drawings lose their behaviour (F2, F3) | 35–55 |
-| Layers, layouts and plotting a sheet | **partial, blocking** | Layers, layouts, viewports, page setups, PDF output, plot styles (CTB/STB, #410), the Plot dialog (#160), Plot Preview and PUBLISH (#186) and plotter devices (#564) work; printers only via PDF/PNG/SVG files (F14, H3) | 15–25 |
-| Save DWG that AutoCAD opens without loss, and reopen others' DWGs | **no** | DXF keeps what we don't model (#528) and writes native MULTILEADERs (#459, not yet tested through DWG); through DWG, acadrust drops custom-class entities and objects and some foreign data; never checked in AutoCAD; no real-file tests; a 10 MB DWG failed after ~2 min (#57) (FF1–FF6) | 40–60 + owner (real-file corpus, AutoCAD check) |
-| **To alpha** | | | **≈ 125–190** |
+**Explicit non-goals for 1.0:**
 
-Ready for real work is ≈ 38%, also under the ~40% alpha bar; closing the gate rows lifts it past
-40%.
+- Full IOS/XE/JunOS CLI parity or binary images.
+- Production-scale sim (millions of pps, hardware-in-the-loop).
+- Copying Cisco/Autodesk icons, fonts, or documentation text.
 
-## Beta checklist
+---
 
-Beta means: close to feature complete for mainstream 2D work, opens and saves DWG reliably,
-remaining gaps are known bugs and edge features (≈ 75% ready for real work).
+## Architecture trajectory
 
-| Item | State | Est. |
-|---|---|---|
-| DWG/DXF: nothing lost on save; MULTILEADER native; version choice; code pages; real-file corpus green; verified in AutoCAD | not started | 50–75 |
-| 2D geometry exact for ellipses and splines; polyline offset correct; relative tolerances | not started | 50–80 |
-| Precision input at AutoCAD level (tracking, dynamic input, overrides, point modifiers, grips, selection keywords, context menus) | partial | 90–140 |
-| Every Draw/Modify prompt option works; associative arrays | partial | 40–60 |
-| Annotation depth: DIMSTYLE manager and variables, missing DIM commands, in-place MTEXT, fields, MLEADER editing, annotative scaling, tables | partial | 90–130 |
-| Xrefs, block editor, dynamic blocks, groups, attribute tools | not started | 90–135 |
-| Plot styles, plot preview, PUBLISH, non-rectangular viewports | partial | 30–45 |
-| Autosave, recovery, AUDIT/RECOVER, Options dialog, templates, SHX, user `.lin`/`.pat` | partial | 40–60 |
-| AutoLISP core subset and SCRIPT | done (AutoLISP #758, SCRIPT #693); Visual LISP, DCL and reactors to come | 30–50 |
-| Catalog plus AutoCAD for Mac's languages | not started | 30–45 |
-| Stability: CI gate, issue backlog, command smoke sweep, geometry fuzzing | partial | 30–50 |
-| Platforms: web open/save, Windows/Linux runtime checks; performance at 1M entities and large DWG | partial | 20–35 |
-| **Total to beta** | | **≈ 600–930** |
+```text
+Phase 0 (now)     net-model ── net-engine ── net-ui-egui ── apps/networkscraft
+Phase 1           + net-sim (event-driven forward plane + basic control plane)
+Phase 2           + net-io (lab files, PCAP export, optional Git-friendly diff)
+Phase 3           + networkscraft-cli, networkscraft-mcp, networkscraft-web
+Phase 4           + net-cli-dialect (personalities: generic, cisco-like, linux-like)
+Optional          + net-bridge (export to containers / real NICs) — post-1.0
+```
 
-About 70% of this parallelises across 4–6 agents (one per row), so elapsed time is roughly
-150–250 hours.
+Layering (enforced like CADCraft):
 
-## Milestones
+| Layer | Crates | Depends on |
+|-------|--------|------------|
+| L0 | `net-model` | serde only |
+| L2 | `net-sim` | `net-model` |
+| L3 | `net-io` | `net-model`, `net-sim` (read-only replay) |
+| L4 | `net-engine` | model + sim + io hooks |
+| L5 | `net-ui-egui`, `networkscraft-mcp` | engine, egui, craft-ui |
+| Apps | `networkscraft`, `networkscraft-cli`, `networkscraft-web` | L5 / engine |
 
-Status re-scored on 2026-10-10 by depth, not presence (the 2026-10-07 percentages, reported by the
-agents that built each milestone, are in the progress log of [ROADMAP.md](../ROADMAP.md)).
+---
 
-| # | Milestone | Status | Remaining (h) |
-|---|---|---|---|
-| M0 | Skeleton and vertical slice: workspace, AutoCAD-style UI, command line, draw/modify basics, DXF, CLI, MCP, web | done | — |
-| M1 | Drafting core: every 2D Draw command and option, dynamic input, object snap tracking, snap overrides | ≈ 55% (Draw breadth strong; tracking, dynamic input, overrides missing) | 35–55 |
-| M2 | Modify: grips, PEDIT, SPLINEDIT, LENGTHEN, BLEND, ALIGN, associative arrays, trim/extend for all curves, MATCHPROP UI | ≈ 50% | 45–70 |
-| M3 | Layers and properties | ≈ 70% (open layer bugs #71–#75, #87) | 10–15 |
-| M4 | Annotation: DIM*, DIMSTYLE manager, MLEADER, in-place MTEXT, fields, tables, annotative scaling, SHX | ≈ 40% | 90–130 |
-| M5 | Hatch and blocks: hatch depth, block editor, dynamic blocks, xrefs, groups, attributes | ≈ 30% | 105–160 |
-| M6 | Layouts and plotting: viewports, page setups, plot styles, preview, PUBLISH | ≈ 35% | 35–50 |
-| M7 | Files: DWG/DXF fidelity and versions, RECOVER/AUDIT, templates, autosave, ETRANSMIT, underlays | ≈ 30% | 170–280 (incl. other formats) |
-| M8 | Inquiry and utilities, OPTIONS, customisation | ≈ 25% | 45–70 |
-| M9 | Parametric | ≈ 50% | 20–30 |
-| M10 | Performance: 1M entities at 60 fps, large DWG loads | ≈ 60% (internal numbers only) | 20–40 |
-| M11 | 3D: UCS, orbit, visual styles, solids, surfaces, meshes, sections, rendering | ≈ 2% | 300–450 |
-| M12 | Automation: AutoLISP, SCRIPT, action recorder, sheet sets, Express Tools | ≈ 15% (MCP, CLI, control channel done) | 130–220 |
-| M13 | 1.0 polish: preferences, workspaces, localisation, accessibility, signed packages, docs | ≈ 15% (signed packages for every platform exist; themes done; string catalog with Ukrainian and German, live language switching, #36) | 110–170 |
-| — | Geometry precision (cross-cutting, see [geometry-parity.md](geometry-parity.md)) | ≈ 40% | 70–110 |
-| — | AI features | ≈ 0% in-app | 40–80 |
-| | **Remaining to full parity** | | **≈ 1,300–2,100** |
+## Milestones (M0 → M4)
 
-Milestone rows overlap a little with the cross-cutting rows; the total is the dimension sum in
-[target-app-parity.md](target-app-parity.md), not the column sum.
+### M0 — Skeleton (current)
 
-## After beta
+**Goal:** Prove UI shell and command routing; no real simulation.
 
-3D foundations (UCS, 3D views, orbit, then solids per `plan/adr/0001`), sheet sets, the full
-AutoLISP surface, AI features with openly licensed local models, and every remaining language.
+| Deliverable | Done? |
+|-------------|-------|
+| `NetApp` + `Session` split | Yes |
+| Panel enum + default docking layout | Yes |
+| Sample topology (R1–SW1–PC1) | Yes |
+| Stub commands (`adddevice`, `select`, `ping`) | Yes |
+| English product docs + roadmap | Yes |
+| Workspace persist, menus, themed chrome | No |
+| Remove or isolate CADCraft from default build | No |
+
+**Exit gate:** `cargo run -p networkscraft` shows all panels; user can add nodes and type commands;
+CI builds Net crates on every PR.
+
+**Estimate remaining:** 20–40 h (workspace, icons, lab New/Open placeholders, CI focus).
+
+---
+
+### M1 — Alpha (“first ping”)
+
+**Goal:** Two hosts ping across a switch; lab saves to disk; simulation is deterministic and tested
+without UI.
+
+| Work | Details |
+|------|---------|
+| `net-sim` crate | Discrete-event or fixed time-step; bounded queues |
+| L2 switch | MAC learn, flood unknown, unicast forward |
+| Host stack | IPv4, ARP, ICMP echo request/reply |
+| Cables | Link up/down; one subnet per broadcast domain initially |
+| Engine | `sim.step`, `sim.run`, `sim.pause`; wire ping to sim |
+| I/O | Lab file v1 (JSON): nodes, links, positions, addresses |
+| UI | Run/Pause toolbar; packet log from sim events |
+| Tests | Hostile caps; regression “two PC ping” never panics |
+
+**Alpha gate (all must pass):**
+
+1. User builds two PCs + switch, assigns IPs, ping succeeds in UI.
+2. Save lab, restart app, open lab, ping still works.
+3. Headless: `networkscraft-cli run lab.json --script 'ping …'` returns exit code 0.
+4. No `unwrap` in production crates; `cargo xtask ci` green for Net workspace.
+
+**Estimate:** 120–200 h cumulative from M0 exit.
+
+---
+
+### M2 — Beta (classroom-ready)
+
+**Goal:** Instructor can ship a VLAN + OSPF lab; students see packets; CLI feels credible for labs.
+
+| Work | Details |
+|------|---------|
+| Router model | Static routes, connected routes, OSPF (single area) |
+| VLANs | 802.1Q on trunk; SVI or ROAS |
+| ACLs | Extended ACL numbered, inbound on interface |
+| DHCP / DNS | Simple server node or server role on host |
+| CLI | `show ip interface brief`, `show ip route`, `show vlan`, config mode subset |
+| Topology UX | Drag-move, link creation tool, snap grid, delete with undo |
+| Packet visual | Step/highlight on link; filter in packet log |
+| i18n | English UI complete; hooks for pt-BR etc. |
+| WASM | Read-only or full sim (decision: full sim if perf allows) |
+
+**Beta gate:**
+
+1. Published “CCNA intro” sample pack (3–5 labs) in separate corpus repo.
+2. Agent can complete lab checklist via MCP (place devices, cable, configure, verify ping).
+3. 30-minute sim session without memory growth over cap (leak tests).
+
+**Estimate:** +280–450 h from alpha.
+
+---
+
+### M3 — 1.0 (general availability)
+
+**Goal:** Trustworthy tool for schools and self-learners; parity with **core** Packet Tracer
+**education** workflows (not every game mode or IoT toy).
+
+| Work | Details |
+|------|---------|
+| Protocol polish | STP (RSTP minimal), ICMP errors, traceroute |
+| Wireless (optional slice) | Simple AP + SSID + one VLAN — if scope confirmed |
+| Assessment | Activity wizard or script rubrics via CLI |
+| Packaging | Linux AppImage/Flatpak, macOS, Windows installers |
+| Docs | User guide, lab authoring guide, command reference |
+| Security | Fuzz lab files; cap file size and node count |
+| Accessibility | Keyboard navigation in topology; reduced motion |
+| Legal | ATTRIBUTION.md for any third-party assets |
+
+**1.0 gate:**
+
+1. External pilot: one course runs full term on NetworksCraft labs.
+2. File format frozen v1 with migration story for v2.
+3. Zero known crashers on corrupted lab upload (report error, keep app alive).
+
+**Estimate:** +200–350 h from beta.
+
+---
+
+### M4 — Beyond 1.0
+
+Ordered by typical demand; not committed dates.
+
+| Theme | Examples |
+|-------|----------|
+| Advanced routing | BGP lab mode, policy maps (simplified) |
+| Multi-vendor CLI | Personality packs (syntax only, clean-room) |
+| Integration | Export config to real devices; optional container attach |
+| Performance | SIMD batch forward; larger topologies (100+ nodes cap raised) |
+| Collaboration | Live share view-only session (optional server) |
+| Mobile | View-only topology (stretch) |
+
+---
+
+## Cross-cutting tracks (whole program)
+
+These run in parallel across milestones.
+
+### Commands and automation
+
+Every user action → `CommandSpec` in `net-engine` with JSON `run` and tests. UI commands in
+`UI_COMMANDS`. MCP tools mirror CADCraft: `execute`, `cmdline.input`, `inspect_topology`,
+`capture_packets`, `render` (topology PNG).
+
+### Never crash
+
+Session and sim stepping under panic guard; hostile lab files; bounded graph size; regression tests
+`hostile_lab_never_panic`.
+
+### Clean-room parity
+
+Maintain `docs/target-app-parity.md` (Packet Tracer education scope) and `docs/gaps.md` work list;
+optional black-box screenshots under local `plan/` (gitignored), never committed.
+
+### Quality gates
+
+`cargo xtask ci`: fmt, clippy, tests, layers, assets (when icons exist), wasm build for web app.
+
+---
+
+## Repository cleanup phases (legacy CADCraft)
+
+| Phase | Action |
+|-------|--------|
+| A | Net crates are primary; document legacy |
+| B | `default-members = ["crates/net-model", …, "apps/networkscraft"]` |
+| C | CI stops building `cadcraft` unless `CI_LEGACY_CAD=1` |
+| D | Delete CAD crates and apps |
+| E | Rename root README, icons, packaging to NetworksCraft |
+
+---
+
+## Rough timeline scenarios
+
+Assuming 1–2 focused contributors or agents:
+
+| Target | Calendar (indicative) |
+|--------|------------------------|
+| M0 complete | +2–4 weeks |
+| M1 alpha | +2–4 months |
+| M2 beta | +6–9 months from start |
+| M3 1.0 | +12–18 months from start |
+
+Calendar varies with scope cuts (e.g. defer wireless, defer OSPF to post-beta).
+
+---
+
+## How to use this doc
+
+- Pick work from the **current milestone** exit gate rows first.
+- When a gate passes, update [ROADMAP.md](../ROADMAP.md) stage and progress log.
+- Split large rows in [gaps.md](gaps.md) (create when M1 starts) for day-to-day tasks.
+
+---
 
 ## Revision history
 
-| Date | Change | Summary |
-|---|---|---|
-| 2026-10-12 | minor | Block Editor for static blocks landed: "Use blocks" evidence updated; status and hours unchanged (REFEDIT and dynamic blocks remain) |
-| 2026-10-11 | minor | Alpha-gate evidence refreshed for merged work (#459, #525, #528, #160, #186, #564); statuses and hours unchanged |
-| 2026-10-10 | minor | Merged main: fmt fixed, Ukrainian catalog noted in M13, ready for real work 38% |
-| 2026-10-10 | minor | Alpha gate added (5 core workflows, 4 failing); stage pre-alpha |
-| 2026-10-10 | major | Created from the old ROADMAP's milestone table and current focus; milestones re-scored by depth; beta checklist added |
+| Date | Change |
+|------|--------|
+| 2026-10-14 | Initial end-to-end roadmap for NetworksCraft |
