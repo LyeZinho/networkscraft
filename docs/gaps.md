@@ -19,9 +19,9 @@ Ranked work items. Agents and contributors should pick from the **top** of this 
 
 | Priority | Gap | Milestone |
 |----------|-----|-----------|
-| P0 | `net-sim` crate with event queue and tests | M1 |
-| P0 | L2 MAC learning and forwarding | M1 |
-| P0 | Host IPv4 + ARP + ICMP echo | M1 |
+| P0 | `net-sim` crate with event queue and tests | M1 — **ping slice landed** |
+| P0 | L2 MAC learning and forwarding | M1 — **initial switch model** |
+| P0 | Host IPv4 + ARP + ICMP echo | M1 — **event trace + same-L2 ping** |
 | P1 | Router static routes | M1 |
 | P1 | Simulation Run/Pause and time scale | M1 |
 | P2 | OSPF single area | M2 |
@@ -79,3 +79,4 @@ Ranked work items. Agents and contributors should pick from the **top** of this 
 | Date | Change |
 |------|--------|
 | 2026-10-14 | Initial gaps list for NetworksCraft |
+| 2026-10-23 | Mark `net-sim` ping slice and ARP/ICMP events in progress on M1 |

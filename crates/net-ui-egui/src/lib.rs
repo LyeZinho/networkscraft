@@ -73,10 +73,10 @@ impl NetApp {
         }
     }
 
-    pub fn ui(&mut self, ctx: &egui::Context) {
+    pub fn ui(&mut self, ui: &mut egui::Ui) {
         let t = theme::Tokens::for_theme(self.shown_theme());
         if self.ui.show_toolbar {
-            egui::TopBottomPanel::top("nc_toolbar").frame(egui::Frame::NONE.fill(t.chrome)).show(ctx, |ui| {
+            egui::Panel::top("nc_toolbar").frame(egui::Frame::NONE.fill(t.chrome)).show(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.heading("NetworksCraft");
                     ui.separator();
@@ -93,7 +93,7 @@ impl NetApp {
             });
         }
         if self.ui.show_status_bar {
-            egui::TopBottomPanel::bottom("nc_status").frame(egui::Frame::NONE.fill(t.chrome)).show(ctx, |ui| {
+            egui::Panel::bottom("nc_status").frame(egui::Frame::NONE.fill(t.chrome)).show(ui, |ui| {
                 ui.horizontal(|ui| {
                     let msg = self.status.as_deref().unwrap_or("Ready");
                     ui.label(msg);
@@ -103,7 +103,7 @@ impl NetApp {
                 });
             });
         }
-        egui::CentralPanel::default().frame(egui::Frame::NONE.fill(t.panel)).show(ctx, |ui| {
+        egui::CentralPanel::default().frame(egui::Frame::NONE.fill(t.panel)).show(ui, |ui| {
             docking::show(self, ui);
         });
     }

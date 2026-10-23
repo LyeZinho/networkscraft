@@ -6,13 +6,16 @@
 mod error;
 
 pub use error::Error;
-use networkscraft_net_model::{DeviceKind, NodeId, Topology};
+pub use networkscraft_net_sim::{PingOutcome, SimEvent};
+use networkscraft_net_model::{DeviceKind, Ipv4Addr, NodeId, Topology};
+use networkscraft_net_sim::ping;
 use serde_json::{Value, json};
 
 #[derive(Clone, Debug, Default)]
 pub struct Session {
     pub topology: Topology,
     log: Vec<String>,
+    packet_events: Vec<SimEvent>,
     selected: Option<NodeId>,
 }
 
@@ -20,10 +23,14 @@ impl Session {
     pub fn with_sample_lab() -> Self {
         let mut topology = Topology::new("Sample lab");
         let r = topology.add_node(DeviceKind::Router, "R1", 120.0, 80.0);
-        let s = topology.add_node(DeviceKind::Switch, "SW1", 280.0, 80.0);
-        let h = topology.add_node(DeviceKind::Host, "PC1", 440.0, 80.0);
-        let _ = topology.add_link(r, s);
-        let _ = topology.add_link(s, h);
+        let sw = topology.add_node(DeviceKind::Switch, "SW1", 280.0, 80.0);
+        let pc1 = topology.add_node(DeviceKind::Host, "PC1", 440.0, 80.0);
+        let pc2 = topology.add_node(DeviceKind::Host, "PC2", 560.0, 80.0);
+        let _ = topology.add_link(r, sw);
+        let _ = topology.add_link(sw, pc1);
+        let _ = topology.add_link(sw, pc2);
+        let _ = topology.set_ipv4(pc1, "10.0.0.1");
+        let _ = topology.set_ipv4(pc2, "10.0.0.2");
         Session { topology, ..Session::default() }
     }
 
@@ -34,6 +41,10 @@ impl Session {
     pub fn log_tail(&self, n: usize) -> &[String] {
         let start = self.log.len().saturating_sub(n);
         &self.log[start..]
+    }
+
+    pub fn packet_events(&self) -> &[SimEvent] {
+        &self.packet_events
     }
 
     pub fn selected(&self) -> Option<NodeId> {
@@ -50,6 +61,7 @@ impl Session {
                 let title = params.get("title").and_then(Value::as_str).unwrap_or("Untitled lab");
                 self.topology = Topology::new(title);
                 self.selected = None;
+                self.packet_events.clear();
                 Ok(json!({ "title": self.topology.title }))
             }
             "adddevice" => {
@@ -74,10 +86,30 @@ impl Session {
                 self.selected = id;
                 Ok(json!({ "selected": self.selected.map(|n| n.0) }))
             }
+            "setipv4" => {
+                let node_id = params
+                    .get("nodeId")
+                    .and_then(Value::as_u64)
+                    .map(NodeId)
+                    .ok_or_else(|| Error::msg("nodeId is required"))?;
+                let addr = params.get("address").and_then(Value::as_str).ok_or_else(|| Error::msg("address is required"))?;
+                self.topology.set_ipv4(node_id, addr).map_err(Error::msg)?;
+                Ok(json!({ "nodeId": node_id.0, "address": addr }))
+            }
             "ping" => {
-                let target = params.get("target").and_then(Value::as_str).unwrap_or("?");
-                self.echo(format!("ping {target}: not available yet (simulation pending)"));
-                Ok(json!({ "message": "simulation not available yet" }))
+                let target = params.get("target").and_then(Value::as_str).ok_or_else(|| Error::msg("target IPv4 is required"))?;
+                let dest = Ipv4Addr::parse(target).ok_or_else(|| Error::msg("target must be a valid IPv4 address"))?;
+                let source = self
+                    .selected
+                    .ok_or_else(|| Error::msg("select a host on the topology, then ping"))?;
+                let (outcome, events) = ping(&self.topology, source, dest);
+                self.packet_events = events;
+                let message = match outcome {
+                    PingOutcome::Success { rtt_ms } => format!("ping {target}: {rtt_ms} ms ({})", outcome.label()),
+                    _ => format!("ping {target}: {}", outcome.label()),
+                };
+                self.echo(message);
+                Ok(json!({ "outcome": outcome.label(), "events": self.packet_events.len() }))
             }
             other => Err(Error::msg(format!("unknown command: {other}"))),
         }
@@ -95,7 +127,7 @@ impl Session {
         let cmd = first.to_ascii_lowercase();
         match cmd.as_str() {
             "ping" => {
-                let target = parts.next().unwrap_or("?");
+                let target = parts.next().ok_or_else(|| Error::msg("usage: ping <IPv4>"))?;
                 self.execute("ping", &json!({ "target": target }))?;
             }
             "select" => {
@@ -106,8 +138,8 @@ impl Session {
             "adddevice" => {
                 let kind = parts.next().ok_or_else(|| Error::msg("usage: adddevice <kind> [name] [x y]"))?;
                 let name = parts.next();
-                let x = parts.next().and_then(|s| s.parse().ok());
-                let y = parts.next().and_then(|s| s.parse().ok());
+                let x = parts.next().and_then(|s| s.parse::<f64>().ok());
+                let y = parts.next().and_then(|s| s.parse::<f64>().ok());
                 let mut p = json!({ "kind": kind });
                 if let Some(n) = name.filter(|n| !n.chars().all(|c| c.is_ascii_digit() || c == '.' || c == '-')) {
                     p["name"] = json!(n);

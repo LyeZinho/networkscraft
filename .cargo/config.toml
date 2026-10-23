@@ -1,2 +1,6 @@
 [alias]
 xtask = "run --package xtask --"
+
+# Arch/CachyOS ship `gcc`, not `x86_64-linux-gnu-gcc` (Debian-style name rustc may pick).
+[target.x86_64-unknown-linux-gnu]
+linker = "gcc"

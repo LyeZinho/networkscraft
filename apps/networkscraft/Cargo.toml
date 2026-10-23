@@ -12,5 +12,5 @@ workspace = true
 
 [dependencies]
 networkscraft-net-ui-egui = { path = "../../crates/net-ui-egui" }
-eframe = { workspace = true, features = ["default_fonts", "glow"] }
+eframe = { workspace = true, features = ["default_fonts", "glow", "wayland", "x11"] }
 egui = { workspace = true }

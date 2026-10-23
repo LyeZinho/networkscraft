@@ -2356,6 +2356,7 @@ name = "networkscraft-net-engine"
 version = "0.7.0"
 dependencies = [
  "networkscraft-net-model",
+ "networkscraft-net-sim",
  "serde",
  "serde_json",
  "thiserror 2.0.21",
@@ -2365,6 +2366,14 @@ dependencies = [
 name = "networkscraft-net-model"
 version = "0.7.0"
 dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "networkscraft-net-sim"
+version = "0.7.0"
+dependencies = [
+ "networkscraft-net-model",
  "serde",
 ]
 

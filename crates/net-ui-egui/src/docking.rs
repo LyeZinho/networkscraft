@@ -135,8 +135,8 @@ impl Workspace {
 
     pub fn reveal_panel(&mut self, panel: Panel) -> Result<(), String> {
         if !self.layout.contains(&panel) {
-            if let Some((_, loc)) = self.hidden.iter().find(|(id, _)| *id == panel).map(|(_, l)| l.clone()) {
-                self.layout.restore(panel, loc).map_err(|e| e.to_string())?;
+            if let Some(loc) = self.hidden.iter().find(|(id, _)| *id == panel).map(|(_, l)| l.clone()) {
+                self.layout.restore(panel, &loc).map_err(|e| e.to_string())?;
             } else {
                 self.layout
                     .apply_with_permissions(
@@ -208,7 +208,11 @@ pub fn show(app: &mut crate::NetApp, ui: &mut egui::Ui) {
         },
     );
     for action in output.actions {
-        if let Err(e) = serde_json::to_value(action).and_then(|a| command(app, false, &json!({ "action": a }))) {
+        let err = match serde_json::to_value(action) {
+            Ok(value) => command(app, false, &json!({ "action": value })),
+            Err(e) => Err(e.to_string()),
+        };
+        if let Err(e) = err {
             app.status = Some(format!("Panel change failed: {e}"));
         }
     }

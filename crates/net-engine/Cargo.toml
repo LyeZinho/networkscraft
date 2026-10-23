@@ -11,6 +11,7 @@ workspace = true
 
 [dependencies]
 networkscraft-net-model = { path = "../net-model" }
+networkscraft-net-sim = { path = "../net-sim" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }

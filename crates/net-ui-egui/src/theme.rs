@@ -2,7 +2,7 @@
 
 use egui::{Color32, Theme, Visuals};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
 pub enum ThemePref {
     #[default]
     Dark,
@@ -18,6 +18,7 @@ impl ThemePref {
     }
 }
 
+#[derive(Clone, Copy)]
 pub struct Tokens {
     pub chrome: Color32,
     pub panel: Color32,
@@ -69,8 +70,12 @@ impl Tokens {
 }
 
 pub fn apply(ctx: &egui::Context, theme: Theme) {
-    let mut visuals = Visuals::from_theme(theme);
+    ctx.set_theme(egui::ThemePreference::from(theme));
     let t = Tokens::for_theme(theme);
+    let mut visuals = match theme {
+        Theme::Dark => Visuals::dark(),
+        Theme::Light => Visuals::light(),
+    };
     visuals.panel_fill = t.panel;
     visuals.window_fill = t.panel;
     visuals.extreme_bg_color = t.chrome;

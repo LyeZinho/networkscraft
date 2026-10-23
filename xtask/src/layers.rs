@@ -46,6 +46,7 @@ pub const TABLE: &[(&str, Class)] = &[
     ("ui-egui", Class::Layer(5)),
     ("mcp", Class::Layer(5)),
     ("net-model", Class::Layer(0)),
+    ("net-sim", Class::Layer(2)),
     ("net-engine", Class::Layer(4)),
     ("net-ui-egui", Class::Layer(5)),
     ("testkit", Class::Testkit),
